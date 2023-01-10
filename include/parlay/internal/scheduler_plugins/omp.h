@@ -17,7 +17,7 @@ inline void parallel_for(size_t start, size_t end, F f, long, bool) {
     for(size_t i=start; i<end; i++) f(i);
 }
 
-bool in_par_do = false;
+inline bool in_par_do = false;
 
 template <typename Lf, typename Rf>
 inline void par_do(Lf left, Rf right, bool) {
