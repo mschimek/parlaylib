@@ -42,6 +42,18 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
     }
   }
   else if (!omp_in_parallel()) {
+#ifdef PARLAY_OPENMP_NO_TASKLOOP
+    // todo check, whether it is also relevant to stop using taskloop in the nested parallelism case, does not seem to be relevant for simple parlay routines
+    #pragma omp parallel
+    {
+      {
+          #pragma omp for schedule(static)
+          for (size_t i = start; i < end; i++) {
+            f(i);
+          }
+      }
+    }
+#else
     #pragma omp parallel
     {
       #pragma omp single
@@ -60,6 +72,7 @@ inline void parallel_for(size_t start, size_t end, F&& f, long granularity, bool
         }
       }
     }
+#endif
   }
   else {
     if (granularity <= 1) {

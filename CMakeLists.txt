@@ -80,6 +80,9 @@ option(PARLAY_OPENMP "Enable integration with OpenMP")
 option(PARLAY_TBB "Enable integration with TBB")
 option(PARLAY_SEQUENTIAL "Run Parlay with no parallelism")
 
+# non-official extension:
+option(PARLAY_OPENMP_NO_TASKLOOP "Disable OpenMP taskloop;" OFF)
+
 if (PARLAY_CILKPLUS)
   message(STATUS "Parlay CilkPlus integration enabled")
   check_cxx_compiler_flag("-fcilkplus" CILKPLUS_SUPPORT)
@@ -109,6 +112,10 @@ elseif(PARLAY_OPENMP)
   if(OpenMP_CXX_FOUND)
     target_compile_definitions(parlay INTERFACE PARLAY_OPENMP)
     target_link_libraries(parlay INTERFACE OpenMP::OpenMP_CXX)
+    if (PARLAY_OPENMP_NO_TASKLOOP)
+      # do not use OpenMP's taskloop parallelization feature, which seems to be slower for simple for-loop parallelization, but faster for more complex tasks
+      target_compile_definitions(parlay INTERFACE PARLAY_OPENMP_NO_TASKLOOP)
+    endif()
   else()
     message(FATAL_ERROR "You are trying to enable OpenMP integration, but your compiler does not support OpenMP, or
                          maybe you don't have OpenMP installed. Fix this, or turn it off (-PARLAY_OPENMP=Off)")
